@@ -11,15 +11,28 @@ import (
 	"google.golang.org/grpc"
 )
 
+// orderServer implements the OrderService gRPC server
 type orderServer struct {
 	pb.UnimplementedOrderServiceServer
 }
 
+// CreateOrder handles the CreateOrder gRPC request
 func (s *orderServer) CreateOrder(ctx context.Context, req *pb.OrderRequest) (*pb.OrderResponse, error) {
 	orderId := uuid.New().String()
+	// Simulate creating order to the database
 	return &pb.OrderResponse{
 		OrderId: orderId,
 		Status: "CREATED",
+	}, nil
+}
+
+// GetOrder handles the GetOrder gRPC request
+func (s *orderServer) GetOrder(ctx context.Context, req *pb.GetOrderRequest) (*pb.GetOrderResponse, error) {
+	// Simulate fetching order from the database
+	return &pb.GetOrderResponse{
+		OrderId: req.OrderId,
+		UserId:  "user123", // Hardcoded for demo
+		Status:  "pending", // Hardcoded for demo
 	}, nil
 }
 
@@ -33,6 +46,13 @@ func main() {
 	grpcServer := grpc.NewServer()
 	pb.RegisterOrderServiceServer(grpcServer, &orderServer{})
 
+	go func() {
+		log.Printf("gRPC server listening on :50051")
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("Failed to serve gRPC: %v", err)
+		}
+	}()
+
 	// Start Fiber app
 	app := fiber.New()
 
@@ -40,14 +60,5 @@ func main() {
 		return c.SendString("Order service is healthy")
 	})
 
-	// Run servers concurrently
-	go func() {
-		log.Fatal(app.Listen(":3001"))
-	}()
-
-	log.Printf("Order service running on :50051 (gRPC) and :3001 (HTTP)")
-	
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
-	}
+	log.Fatal(app.Listen(":3001"))
 }

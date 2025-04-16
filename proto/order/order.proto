@@ -4,6 +4,7 @@ option go_package = "github.com/DinukaKaveen/Golang-gRPC-Microservices/proto/ord
 
 service OrderService {
     rpc CreateOrder (OrderRequest) returns (OrderResponse) {}
+    rpc GetOrder (GetOrderRequest) returns (GetOrderResponse) {}
 }
 
 message OrderRequest {
@@ -14,4 +15,14 @@ message OrderRequest {
 message OrderResponse {
     string order_id = 1;
     string status = 2;
+}
+
+message GetOrderRequest {
+    string order_id = 1;
+}
+
+message GetOrderResponse {
+    string order_id = 1;
+    string user_id = 2;
+    string status = 3;
 }

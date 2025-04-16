@@ -31,11 +31,11 @@ func main() {
 	// Initialize Fiber app
 	app := fiber.New()
 
-	// Sample REST endpoint
+	// Create Order REST endpoint
 	app.Post("/users/:id/order", func(c *fiber.Ctx) error {
 		userId := c.Params("id")
 
-		// Call Order Service via gRPC
+		// Call gRPC CreateOrder method
 		resp, err := orderClient.CreateOrder(c.Context(), &pb.OrderRequest{
 			UserId: userId,
 			Amount: 100.00,
@@ -47,6 +47,32 @@ func main() {
 
 		return c.JSON(fiber.Map{
 			"order_id": resp.OrderId,
+			"status":   resp.Status,
+		})
+	})
+
+	// Get Order REST endpoint
+	app.Get("/user/:userId/orders/:orderId", func (c *fiber.Ctx) error {
+		userId := c.Params("userId")
+		orderId := c.Params("orderId")
+
+		// Call gRPC GetOrder method
+		resp, err := orderClient.GetOrder(c.Context(), &pb.GetOrderRequest{
+			OrderId: orderId,
+		})
+
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
+
+		// Verify user ID matches
+		if resp.UserId != userId {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Order does not belong to user"})
+		}
+
+		return c.JSON(fiber.Map{
+			"order_id": resp.OrderId,
+			"user_id":  resp.UserId,
 			"status":   resp.Status,
 		})
 	})
