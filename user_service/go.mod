@@ -3,7 +3,7 @@ module github.com/DinukaKaveen/Golang-gRPC-Microservices/user_service
 go 1.24.1
 
 require (
-	github.com/DinukaKaveen/Golang-gRPC-Microservices v0.0.0-20250416071938-534bdca6c9b1
+	github.com/DinukaKaveen/Golang-gRPC-Microservices v0.0.0-20250416082612-3830add5fb9f
 	github.com/gofiber/fiber/v2 v2.52.6
 	google.golang.org/grpc v1.71.1
 )
@@ -25,3 +25,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 )
+
+replace github.com/DinukaKaveen/Golang-gRPC-Microservices => ../

@@ -1,6 +1,6 @@
 syntax = "proto3";
 package order;
-option go_package = "github.com/DinukaKaveen/Golang-gRPC-Microservices/generated";
+option go_package = "github.com/DinukaKaveen/Golang-gRPC-Microservices/proto/order/generated";
 
 service OrderService {
     rpc CreateOrder (OrderRequest) returns (OrderResponse) {}
