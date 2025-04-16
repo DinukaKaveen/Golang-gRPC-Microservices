@@ -137,7 +137,7 @@ const file_order_proto_rawDesc = "" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status2J\n" +
 	"\fOrderService\x12:\n" +
-	"\vCreateOrder\x12\x13.order.OrderRequest\x1a\x14.order.OrderResponse\"\x00B\rZ\v./generatedb\x06proto3"
+	"\vCreateOrder\x12\x13.order.OrderRequest\x1a\x14.order.OrderResponse\"\x00B=Z;github.com/DinukaKaveen/Golang-gRPC-Microservices/generatedb\x06proto3"
 
 var (
 	file_order_proto_rawDescOnce sync.Once

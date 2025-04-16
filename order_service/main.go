@@ -1,55 +1,53 @@
 package main
 
 import (
+	"context"
 	"log"
-
-	pb "github.com/your-repo-name/your-project-name/proto/order/generated"
+	"net"
 
 	"github.com/gofiber/fiber/v2"
+	pb "github.com/DinukaKaveen/Golang-gRPC-Microservices/proto/order/generated"
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type orderServer struct {
+	pb.UnimplementedOrderServiceServer
+}
+
+func (s *orderServer) CreateOrder(ctx context.Context, req *pb.OrderRequest) (*pb.OrderResponse, error) {
+	orderId := uuid.New().String()
+	return &pb.OrderResponse{
+		OrderId: orderId,
+		Status: "CREATED",
+	}, nil
 }
 
 func main() {
-	// Create new gRPC client to connect to Order Service gRPC
-	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	// Start gRPC server
+	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		log.Fatal("Failed to connect to order service: %v", err)
+		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	// Dont forget to close it
-	defer conn.Close()
+	grpcServer := grpc.NewServer()
+	pb.RegisterOrderServiceServer(grpcServer, &orderServer{})
 
-	// Create a new order service client from generated code and pass in the connection created above
-	orderClient := pb.NewOrderServiceClient(conn)
-
-	// Initialize Fiber app
+	// Start Fiber app
 	app := fiber.New()
 
-	// Sample REST endpoint
-	app.Post("/users/:id/order", func(c *fiber.Ctx) error {
-		userId := c.Params("id")
-
-		// Call Order Service via gRPC
-		resp, err := orderClient.CreateOrder(c.Context(), &pb.OrderRequest{
-			UserId: userId,
-			Amount: 100.00,
-		})
-
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
-
-		return c.JSON(fiber.Map{
-			"order_id": resp.OrderId,
-			"status":   resp.Status,
-		})
+	app.Get("/health", func(c *fiber.Ctx) error {
+		return c.SendString("Order service is healthy")
 	})
 
-	log.Fatal(app.Listen(":3000"))
+	// Run servers concurrently
+	go func() {
+		log.Fatal(app.Listen(":3001"))
+	}()
+
+	log.Printf("Order service running on :50051 (gRPC) and :3001 (HTTP)")
+	
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("Failed to serve: %v", err)
+	}
 }
